@@ -3,18 +3,22 @@ name: Run BSP Rate Bot
 on:
   schedule:
     - cron: '0 */8 * * *'  # ၈ နာရီတစ်ခါ အလိုအလျောက် Run ရန်
-  workflow_dispatch:      # ကိုယ်တိုင် လက်နဲ့ နှိပ် Run ချင်ရင် သုံးရန်
+  workflow_dispatch:      # Manual Run ခလုတ် ပေါ်စေရန်
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # Node.js 24 ကို အတင်းအကျပ် သုံးခိုင်းရန် (Warning ပျောက်စေရန်)
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4  # v3 မှ v4 သို့ ပြောင်းထားပါသည်
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5  # v4 မှ v5 သို့ ပြောင်းထားပါသည်
       with:
         python-version: '3.10'
 
