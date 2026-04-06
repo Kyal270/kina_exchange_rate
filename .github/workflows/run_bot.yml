@@ -2,8 +2,8 @@ name: Run BSP Rate Bot
 
 on:
   schedule:
-    - cron: '0 */8 * * *'  # ၈ နာရီတစ်ခါ အလိုအလျောက် Run ရန်
-  workflow_dispatch:      # Manual Run ခလုတ် ပေါ်စေရန်
+    - cron: '0 */8 * * *' # မူလ ၈ နာရီတစ်ခါ Run မည့်အချိန်
+  workflow_dispatch: # 🎯 ဒါလေးပေါင်းထည့်ပါ (အပြင်ကနေ လှမ်းနှိုးခွင့်ပေးခြင်း)
 
 jobs:
   build:
