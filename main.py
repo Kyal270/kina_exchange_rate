@@ -15,16 +15,18 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwOE_rjY1ZHIVnPHWHYXh-ze14okXdQQZ2IAQfGUYZX_k_6zkEGWCT1KQz1NGDzEJ14/exec"
 
 def get_manual_rates():
-    """Google Apps Script မှ နောက်ဆုံး Update လုပ်ထားသော ဈေးနှုန်းများကို ဆွဲယူမည်"""
+    """Google Apps Script မှ ဈေးနှုန်းများနှင့် တက်/ကျ မြှားများကို ဆွဲယူမည်"""
     print("⏳ Fetching manual rates from Telegram Bot...")
     try:
         res = requests.get(GAS_WEB_APP_URL, timeout=15)
         data = res.json()
-        return float(data["usd"]), float(data["cny"]), float(data["sgd"])
+        return (
+            float(data["usd"]), float(data["cny"]), float(data["sgd"]),
+            data.get("usd_trend", "➖"), data.get("cny_trend", "➖"), data.get("sgd_trend", "➖")
+        )
     except Exception as e:
         print(f"❌ Could not fetch rates from GAS: {e}. Using default rates.")
-        return 4500.0, 620.0, 3300.0
-
+        return 4500.0, 620.0, 3300.0, "➖", "➖", "➖"
 def scrape_bsp_final_fix():
     print("⏳ Connecting to BSP PNG... Fetching TT Sell rates for USD, CNY, and SGD...")
     options = Options()
@@ -69,8 +71,8 @@ def scrape_bsp_final_fix():
     return bsp_rates
 
 def run_script():
-    # 1. ဈေးနှုန်းများ ယူမည်
-    MANUAL_USD_MMK, MANUAL_CNY_MMK, MANUAL_SGD_MMK = get_manual_rates()
+    # 🎯 မြှားလေးတွေကိုပါ လက်ခံယူပါမယ်
+    MANUAL_USD_MMK, MANUAL_CNY_MMK, MANUAL_SGD_MMK, usd_trend, cny_trend, sgd_trend = get_manual_rates()
     print(f"📌 Rates to use -> USD: {MANUAL_USD_MMK}, CNY: {MANUAL_CNY_MMK}, SGD: {MANUAL_SGD_MMK}")
 
     bsp = scrape_bsp_final_fix()
@@ -80,11 +82,12 @@ def run_script():
         pgk_to_mmk_cny = bsp["CNY"] * MANUAL_CNY_MMK if bsp["CNY"] else 0
         pgk_to_mmk_sgd = bsp["SGD"] * MANUAL_SGD_MMK if bsp["SGD"] else 0
 
+        # 🎯 စာသားဘေးမှာ မြှားလေးတွေ ကပ်ထည့်ပါမယ်
         msg = "🏦 *Kina Exchange Rates*\n"
         msg += "----------------------------------------\n"
-        msg += f"🇺🇸 *USD/MMK Market:* `{MANUAL_USD_MMK:,.0f}`\n"
-        msg += f"🇨🇳 *CNY/MMK Market:* `{MANUAL_CNY_MMK:,.0f}`\n"
-        msg += f"🇸🇬 *SGD/MMK Market:* `{MANUAL_SGD_MMK:,.0f}`\n"
+        msg += f"🇺🇸 *USD/MMK Market:* `{MANUAL_USD_MMK:,.0f}` {usd_trend}\n"
+        msg += f"🇨🇳 *CNY/MMK Market:* `{MANUAL_CNY_MMK:,.0f}` {cny_trend}\n"
+        msg += f"🇸🇬 *SGD/MMK Market:* `{MANUAL_SGD_MMK:,.0f}` {sgd_trend}\n"
         msg += "----------------------------------------\n"
         msg += "🇵🇬 *1 PGK -> Myanmar Kyats*\n"
         msg += f"• Via USD: *{pgk_to_mmk_usd:,.2f}* MMK\n"
